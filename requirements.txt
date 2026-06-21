@@ -1,0 +1,9 @@
+requests
+pillow
+numpy
+moviepy
+python-telegram-bot
+playwright
+invisible_playwright
+arabic-reshaper
+python-bidi

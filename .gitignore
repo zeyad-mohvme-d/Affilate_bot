@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Secrets — NEVER commit these
+config.json
+x_cookies.json
+pinterest_cookies.json
+
+# Generated artifacts
+output/
+logs/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

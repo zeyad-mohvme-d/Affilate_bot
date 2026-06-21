@@ -1,0 +1,27 @@
+{
+  "schedule_times": ["09:00","10:00","12:00","14:00","16:00","17:00","18:00","20:00","21:00","22:00"],
+  "products_per_day": 10,
+  "prioritize_discounts": true,
+
+  "amazon": {
+    "source_url": "https://www.amazon.sa/s?k=home+improvement&i=bazaar&_encoding=UTF8&ref=sv__8",
+    "tag_saudi": "tikshoping01-21",
+    "tag_us": "electron039ae-20"
+  },
+
+  "telegram": {
+    "bot_token": "set via TELEGRAM_BOT_TOKEN env var",
+    "channel_id": "set via TELEGRAM_CHANNEL_ID env var"
+  },
+
+  "pinterest": {
+    "email": "set via PINTEREST_EMAIL env var",
+    "password": "set via PINTEREST_PASSWORD env var",
+    "default_board": "for amazon"
+  },
+
+  "captions": {
+    "language": "ar",
+    "hashtags": "#عروض #تخفيضات #أمازون #amazon #deals"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "groups": [
+    {
+      "id": "group_1",
+      "name": "الملابس والأمتعة والأحذية",
+      "categories": [
+        {
+          "name": "الملابس",
+          "query": "clothing"
+        },
+        {
+          "name": "الأمتعة",
+          "query": "luggage"
+        },
+        {
+          "name": "الأحذية",
+          "query": "shoes"
+        }
+      ]
+    },
+    {
+      "id": "group_2",
+      "name": "السيارات والأطفال ومستحضرات التجميل / مستحضرات التجميل الفاخرة والصحة والعناية الشخصية والآلات الموسيقية وأجهزة العناية الشخصية والرياضة وجمع الطوابع",
+      "categories": [
+        {
+          "name": "السيارات",
+          "query": "automotive"
+        },
+        {
+          "name": "الأطفال",
+          "query": "baby"
+        },
+        {
+          "name": "مستحضرات التجميل",
+          "query": "beauty"
+        },
+        {
+          "name": "مستحضرات التجميل الفاخرة",
+          "query": "luxury beauty"
+        },
+        {
+          "name": "الصحة والعناية الشخصية",
+          "query": "health personal care"
+        },
+        {
+          "name": "الآلات الموسيقية",
+          "query": "musical instruments"
+        },
+        {
+          "name": "أجهزة العناية الشخصية",
+          "query": "personal care appliances"
+        },
+        {
+          "name": "الرياضة",
+          "query": "sports"
+        },
+        {
+          "name": "جمع الطوابع",
+          "query": "stamp collecting"
+        }
+      ]
+    },
+    {
+      "id": "group_3",
+      "name": "الأثاث والموسيقى والمنتجات المكتبية والأدوات",
+      "categories": [
+        {
+          "name": "الأثاث",
+          "query": "furniture"
+        },
+        {
+          "name": "الموسيقى",
+          "query": "music"
+        },
+        {
+          "name": "المنتجات المكتبية",
+          "query": "office products"
+        },
+        {
+          "name": "الأدوات",
+          "query": "tools"
+        }
+      ]
+    },
+    {
+      "id": "group_4",
+      "name": "البقالة والمنزل والأجهزة الرئيسية والأماكن الخارجية ومنتجات الحيوانات الأليفة والألعاب",
+      "categories": [
+        {
+          "name": "البقالة",
+          "query": "grocery"
+        },
+        {
+          "name": "المنزل",
+          "query": "home"
+        },
+        {
+          "name": "الأجهزة الرئيسية",
+          "query": "major appliances"
+        },
+        {
+          "name": "الأماكن الخارجية",
+          "query": "outdoor"
+        },
+        {
+          "name": "منتجات الحيوانات الأليفة",
+          "query": "pet products"
+        },
+        {
+          "name": "الألعاب",
+          "query": "toys"
+        }
+      ]
+    }
+  ]
+}
