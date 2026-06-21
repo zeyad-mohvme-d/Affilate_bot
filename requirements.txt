@@ -4,6 +4,6 @@ numpy
 moviepy
 python-telegram-bot
 playwright
-invisible_playwright
+invisible_playwright @ git+https://github.com/feder-cr/invisible_playwright.git
 arabic-reshaper
 python-bidi
