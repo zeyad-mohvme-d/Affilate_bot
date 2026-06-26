@@ -1,21 +1,5 @@
 [
   {
-    "asin": "B096NBQVVL",
-    "name": "adidas",
-    "price": "SAR 115.00",
-    "old_price": "SAR 320.85",
-    "has_discount": true,
-    "link": "https://www.amazon.sa/-/en/Adidas-Running-Legink-Ftwwht-Grefiv/dp/B096NBQVVL/ref=sr_1_17?dib=eyJ2IjoiMSJ9.fgzLQNPsaBnABwyiNNNK8BdJtmUIXVPr1MwA4mBKg7J91hWdWd2HncdCPqoUpKVCG4k4yGtY7uqVjDICRJez22gx-upciTObHR5JZHedRvy9zm3Zsuqql0qPubiDTKvUH5EaSLxnmAauYg0xcFCBkMJA9j84BfY4em9ptFJhrxBPigzBNh8UGzCN7QHxxfWb6_7oYKkWxQvo36q5tijbgYvbxEeyrD7oc_4EMg511-_ae8J0_nn6ZWNzMeNxVNmZ7_Eb5K-3lX962qGrJ_Fs5ox6_3H7oUMK65jDueoagvM.EpMNDhLMizQZK47sg8YUjeparrWfcbKfJp837RO-_Oo&dib_tag=se&keywords=shoes&qid=1782454306&sr=8-17",
-    "image_url": "https://m.media-amazon.com/images/I/51jWVRohSwL._AC_UL320_.jpg",
-    "group_id": "group_1",
-    "group_name": "الملابس والأمتعة والأحذية",
-    "category": "الأحذية",
-    "query": "shoes",
-    "source_url": "https://www.amazon.sa/s?k=shoes&language=en_AE",
-    "affiliate_link_saudi": "https://www.amazon.sa/dp/B096NBQVVL?tag=tikshoping01-21",
-    "affiliate_link_us": "https://www.amazon.sa/dp/B096NBQVVL?tag=electron039ae-20"
-  },
-  {
     "asin": "B09B17QFJ3",
     "name": "New Balance",
     "price": "SAR 339.45",
