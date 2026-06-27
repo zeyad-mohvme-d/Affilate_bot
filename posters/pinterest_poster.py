@@ -199,13 +199,41 @@ async def _create_pin(page, image_path, caption, link, board_name):
 
     await page.screenshot(path=str(DEBUG_DIR / "pinterest_before_publish.png"))
 
-    # Click Publish
-    publish_button = page.get_by_role("button", name="Publish")
-    await publish_button.first.click()
-    await page.wait_for_timeout(5000)
+    # Click Publish — exact match avoids picking "Publish at scheduled time" etc.
+    # Pinterest's button stays disabled until board is selected + form valid; wait for it.
+    publish_button = page.get_by_role("button", name="Publish", exact=True).first
+    try:
+        await publish_button.wait_for(state="visible", timeout=15000)
+        # Poll for the button to become enabled (Playwright's click auto-waits but
+        # Pinterest keeps the button in DOM as disabled until validation passes).
+        for _ in range(40):
+            if await publish_button.is_enabled():
+                break
+            await page.wait_for_timeout(500)
+        await publish_button.click(timeout=10000)
+    except Exception as e:
+        logger.error(f"Pinterest: publish button click failed: {e}")
+        await page.screenshot(path=str(DEBUG_DIR / "pinterest_publish_failed.png"))
+        raise
 
+    # Wait for navigation away from the pin creation page — this confirms the
+    # pin was actually published (not just saved as draft).
+    try:
+        await page.wait_for_url(
+            lambda url: "/pin-creation-tool" not in url,
+            timeout=30000,
+        )
+    except Exception:
+        await page.screenshot(path=str(DEBUG_DIR / "pinterest_publish_no_nav.png"))
+        current_url = page.url
+        raise RuntimeError(
+            f"Pinterest: publish click did not navigate away from creation page. "
+            f"URL is still {current_url} — pin likely saved as draft."
+        )
+
+    await page.wait_for_timeout(2000)
     await page.screenshot(path=str(DEBUG_DIR / "pinterest_after_publish.png"))
-    logger.info("Pinterest: pin published successfully.")
+    logger.info(f"Pinterest: pin published successfully. URL: {page.url}")
 
 
 async def _post_async(image_path, caption, link, headed=False):
