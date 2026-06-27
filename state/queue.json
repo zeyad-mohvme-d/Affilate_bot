@@ -1,21 +1,5 @@
 [
   {
-    "asin": "B071HHX4TB",
-    "name": "Amazon Basics",
-    "price": "SAR 199.00",
-    "old_price": "SAR 233.00",
-    "has_discount": true,
-    "link": "https://www.amazon.sa/-/en/Amazon-Basics-Hardside-Luggage-26-Material/dp/B071HHX4TB/ref=sr_1_20?dib=eyJ2IjoiMSJ9.9Nasr_2AJ9A1NPrGLTAvKQkOlaeuKKUwGllpWl0GUl2-E7gceLIK-HpOd0q8Xc-ng-1gmdn8zoqe_63q9nJ9s6MWFnla2VnSGq7CeZ8yj7IymPdXirNQbGphws3d6SZHharLlzZ86Qgzgc-mBU0slwQYAgmMUJYzH3lR4nOCcMddGxJa-tvDdkAhTkhsWYpZH0wUDT_v7qufsSPKAa77NaiA8GCVPESnITZ89IL8l3mPMgea3rJBxskXey-9jFJzw8-pDw8HBaswl2xWgha3uvczSTCijev1WQ8mWiusQvY.Vg1tmaAVr6fOerI0UdNFnpvjhMC1afgwDYCBHBggxhU&dib_tag=se&keywords=luggage&qid=1782539628&sr=8-20",
-    "image_url": "https://m.media-amazon.com/images/I/9182wypEdkL._AC_UL320_.jpg",
-    "group_id": "group_1",
-    "group_name": "الملابس والأمتعة والأحذية",
-    "category": "الأمتعة",
-    "query": "luggage",
-    "source_url": "https://www.amazon.sa/s?k=luggage&language=en_AE",
-    "affiliate_link_saudi": "https://www.amazon.sa/dp/B071HHX4TB?tag=tikshoping01-21",
-    "affiliate_link_us": "https://www.amazon.sa/dp/B071HHX4TB?tag=electron039ae-20"
-  },
-  {
     "asin": "B07DX75JBN",
     "name": "Tommy Hilfiger",
     "price": "SAR 69.00",
