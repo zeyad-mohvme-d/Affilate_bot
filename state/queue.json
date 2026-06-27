@@ -1,21 +1,5 @@
 [
   {
-    "asin": "B071NJ24R9",
-    "name": "Amazon Basics",
-    "price": "SAR 169.00",
-    "old_price": "SAR 189.00",
-    "has_discount": true,
-    "link": "https://www.amazon.sa/-/en/Amazon-Basics-Hardside-Spinner-21-Material/dp/B071NJ24R9/ref=sr_1_19?dib=eyJ2IjoiMSJ9.VofqWXptR-hwXvzo11YbkTUm0HDGoYbgvXmwAU3CH8W-E7gceLIK-HpOd0q8Xc-nKF5UdnSvVqqpU14aGlgkYe8Wr52xuWaIqtxG98XidKSr3RdVjQ7cvo1PC7daIC3E5YCUP3hpAjvgUaLeoFWBGFlsgs54SoIJrrx4asW1896rcjG91SXZMW0P_522nFygH-fEAO08SKSPIfbc0p9HF3Ac8rfvXT_JUsoeoNWEOG6ZHM-dZCMS7c8VX_aVJsRso2WPY606VDcPM6BJB7-H7PpkCw9qirqPBS0vcEQOG1c.O9Najwx3ZjfHo-oOQ6XBExJbeKOGGNy67Sw0K36ZCfw&dib_tag=se&keywords=luggage&qid=1782594331&sr=8-19",
-    "image_url": "https://m.media-amazon.com/images/I/91g9s0UqTBL._AC_UL320_.jpg",
-    "group_id": "group_1",
-    "group_name": "الملابس والأمتعة والأحذية",
-    "category": "الأمتعة",
-    "query": "luggage",
-    "source_url": "https://www.amazon.sa/s?k=luggage&language=en_AE",
-    "affiliate_link_saudi": "https://www.amazon.sa/dp/B071NJ24R9?tag=electron039ae-20",
-    "affiliate_link_us": "https://www.amazon.sa/dp/B071NJ24R9?tag=electron039ae-20"
-  },
-  {
     "asin": "B07S9S4QTV",
     "name": "PUMA",
     "price": "SAR 107.00",
