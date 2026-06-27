@@ -12,6 +12,7 @@ History lives at: state/posted.json (prevents duplicates)
 import argparse
 import json
 import logging
+import re
 import sys
 import traceback
 from datetime import datetime
@@ -33,19 +34,35 @@ QUEUE_PATH = STATE_DIR / "queue.json"
 POSTED_PATH = STATE_DIR / "posted.json"
 IMAGE_DIR = PROJECT_DIR / "output" / "images"
 
+# Amazon CDN image URLs contain a size suffix between two dots, e.g.
+#   ._AC_UL320_.jpg     (320 px thumbnail used in search results)
+#   ._SY300_.jpg        (300 px square)
+#   ._AC_SX466_.jpg
+# Replacing the whole suffix with ._SL1500_ asks the CDN for the 1500 px
+# version of the same image, which clears Pinterest's 200x300 minimum.
+_AMAZON_SIZE_SUFFIX = re.compile(r"\._[A-Z0-9_,]+_\.")
+
+
+def _amazon_high_res(url: str) -> str:
+    if not url or "media-amazon.com" not in url:
+        return url
+    return _AMAZON_SIZE_SUFFIX.sub("._SL1500_.", url)
+
 
 def download_product_image(product):
-    """Download the raw Amazon product image and save it to disk."""
+    """Download the high-res Amazon product image and save it to disk."""
     url = product.get("image_url")
     if not url:
         raise RuntimeError(f"Product {product.get('asin')} has no image_url")
 
+    high_res_url = _amazon_high_res(url)
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
     dest = IMAGE_DIR / f"{product['asin']}.jpg"
 
-    resp = requests.get(url, timeout=20)
+    resp = requests.get(high_res_url, timeout=20)
     resp.raise_for_status()
     dest.write_bytes(resp.content)
+    logger.info(f"Image downloaded ({len(resp.content)} bytes) from {high_res_url}")
     return dest
 
 for stream in (sys.stdout, sys.stderr):
