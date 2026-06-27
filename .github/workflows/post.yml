@@ -73,8 +73,8 @@ jobs:
           PINTEREST_PASSWORD: ${{ secrets.PINTEREST_PASSWORD }}
         run: python main.py --post
 
-      - name: Upload debug artifacts on failure
-        if: failure()
+      - name: Upload debug artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: debug-${{ github.run_id }}
