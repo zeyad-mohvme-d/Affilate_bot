@@ -17,9 +17,10 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+import requests
+
 from scraper.amazon_scraper import get_products
 from content.caption import build as build_caption
-from content.image_builder import build as build_image
 from content.video_builder import build as build_video
 from posters.telegram_poster import post as post_telegram
 from posters.pinterest_poster import post as post_pinterest
@@ -30,6 +31,22 @@ PROJECT_DIR = Path(__file__).resolve().parent
 STATE_DIR = PROJECT_DIR / "state"
 QUEUE_PATH = STATE_DIR / "queue.json"
 POSTED_PATH = STATE_DIR / "posted.json"
+IMAGE_DIR = PROJECT_DIR / "output" / "images"
+
+
+def download_product_image(product):
+    """Download the raw Amazon product image and save it to disk."""
+    url = product.get("image_url")
+    if not url:
+        raise RuntimeError(f"Product {product.get('asin')} has no image_url")
+
+    IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    dest = IMAGE_DIR / f"{product['asin']}.jpg"
+
+    resp = requests.get(url, timeout=20)
+    resp.raise_for_status()
+    dest.write_bytes(resp.content)
+    return dest
 
 for stream in (sys.stdout, sys.stderr):
     reconfigure = getattr(stream, "reconfigure", None)
@@ -96,12 +113,12 @@ def run_post():
     product = queue[0]
     logger.info(f"Posting: {product['name'][:70]}")
 
-    # Build content
+    # Download the raw Amazon product photo (no overlay / branding).
     try:
-        image_path = build_image(product)
+        image_path = download_product_image(product)
         logger.info(f"Image: {image_path}")
     except Exception:
-        logger.error(f"Image build failed:\n{traceback.format_exc()}")
+        logger.error(f"Image download failed:\n{traceback.format_exc()}")
         sys.exit(1)
 
     try:
