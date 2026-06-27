@@ -1,10 +1,22 @@
 """
-Caption Builder — generates marketing text for each product post.
-Rotates between templates to avoid spam flags.
-Reads hashtags and language from config.json.
+Caption Builder — generates the marketing text for each product post.
+
+Format matches the Saudi-deals-channel style:
+
+    {product name}
+
+    العرض الآن {price} ✅
+
+    {bank discount line}
+    {channel code line}
+
+    {affiliate link}
+
+The two discount lines are static text from config.json (captions.bank_discount_line
+and captions.channel_code_line) — client edits these when their promo codes change.
+Either line can be empty to skip it.
 """
 
-import random
 import logging
 import sys
 from pathlib import Path
@@ -14,166 +26,63 @@ from core.config import load_config as _load_config
 
 logger = logging.getLogger(__name__)
 
-TEMPLATES_AR = [
-    (
-        "🔥 عرض اليوم\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💰 السعر: {price}\n\n"
-        "🛒 اطلب الآن:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "⭐ منتج مميز\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💲 {price}\n\n"
-        "🔗 للطلب:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "💎 لا تفوّت هالعرض!\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💰 بسعر: {price}\n\n"
-        "👇 اطلبه من هنا:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "🛍️ وصل حديثاً\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💰 السعر: {price}\n\n"
-        "🛒 احصل عليه الآن:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "✨ اختيارنا لك اليوم\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💲 فقط {price}\n\n"
-        "🔗 رابط الشراء:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "🏷️ عرض خاص\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💰 السعر الحالي: {price}\n\n"
-        "🛒 اشتري الآن:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "📢 توصية اليوم\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💲 بـ {price} بس!\n\n"
-        "👇 الرابط:\n{link}\n\n"
-        "{hashtags}"
-    ),
-    (
-        "🎯 صفقة ما تتكرر\n"
-        "📦 {name}\n"
-        "{discount_line}"
-        "💰 {price}\n\n"
-        "🛒 اطلبه قبل ينتهي:\n{link}\n\n"
-        "{hashtags}"
-    ),
-]
-
-_last_template_index = -1
+X_MAX_LEN = 275  # Hard cap a bit under X's 280 to be safe.
 
 
 def build(product, platform="telegram"):
     """
     Build a marketing caption for a product.
 
-    product dict keys:
-        name, price, old_price, has_discount,
-        affiliate_link_saudi, affiliate_link_us
+    product dict keys used:
+        name, price, affiliate_link_saudi, affiliate_link_us
 
     platform: "telegram", "x", or "pinterest"
         - telegram/x use Saudi affiliate link
         - pinterest uses US affiliate link
     """
-    global _last_template_index
-
-    config = _load_config()
-    hashtags = config.get("captions", {}).get("hashtags", "")
+    captions = _load_config().get("captions", {})
+    bank_line = (captions.get("bank_discount_line") or "").strip()
+    channel_line = (captions.get("channel_code_line") or "").strip()
 
     if platform == "pinterest":
-        link = product.get("affiliate_link_us", product.get("link", ""))
+        link = product.get("affiliate_link_us") or product.get("link", "")
     else:
-        link = product.get("affiliate_link_saudi", product.get("link", ""))
+        link = product.get("affiliate_link_saudi") or product.get("link", "")
 
-    discount_line = ""
-    if product.get("has_discount") and product.get("old_price"):
-        discount_line = f"🏷️ قبل: {product['old_price']} ← خصم!\n"
+    name = (product.get("name") or "").strip()
+    price = (product.get("price") or "").strip()
 
-    available = list(range(len(TEMPLATES_AR)))
-    if _last_template_index in available and len(available) > 1:
-        available.remove(_last_template_index)
-    chosen = random.choice(available)
-    _last_template_index = chosen
+    sections = [name, f"العرض الآن {price} ✅"]
 
-    template = TEMPLATES_AR[chosen]
+    discount_lines = [line for line in (bank_line, channel_line) if line]
+    if discount_lines:
+        sections.append("\n".join(discount_lines))
 
-    caption = template.format(
-        name=product.get("name", ""),
-        price=product.get("price", ""),
-        discount_line=discount_line,
-        link=link,
-        hashtags=hashtags,
-    )
+    sections.append(link)
 
-    if platform == "x" and len(caption) > 270:
-        caption = _trim_for_x(caption, link)
+    caption = "\n\n".join(sections)
+
+    if platform == "x" and len(caption) > X_MAX_LEN:
+        caption = _trim_for_x(name, price, discount_lines, link)
 
     return caption
 
 
-def _trim_for_x(caption, link):
-    """Trim caption to fit X's 280 char limit, keeping the link intact."""
-    max_len = 275
-    lines = caption.split("\n")
-    result = []
-    current_len = 0
+def _trim_for_x(name, price, discount_lines, link):
+    """Build a shorter caption for X. Keeps the link intact and trims the name."""
+    price_line = f"العرض الآن {price} ✅"
+    discount_block = "\n".join(discount_lines) if discount_lines else ""
 
-    for line in lines:
-        if link in line:
-            result.append(line)
-            current_len += len(line) + 1
-            continue
-        if current_len + len(line) + 1 <= max_len:
-            result.append(line)
-            current_len += len(line) + 1
+    # Fixed parts always kept: price line, discount block, link.
+    fixed = "\n\n".join(part for part in (price_line, discount_block, link) if part)
+    fixed_len = len(fixed) + 2  # +2 for the blank line after the name
 
-    return "\n".join(result)
+    available = X_MAX_LEN - fixed_len
+    if available <= 0:
+        # No room for name at all — drop it.
+        return fixed
 
+    if len(name) > available:
+        name = name[: max(0, available - 1)].rstrip() + "…"
 
-# ── Standalone test ───────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    import sys
-
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure:
-            reconfigure(encoding="utf-8", errors="replace")
-
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-
-    sample = {
-        "name": "مثقاب كهربائي لاسلكي بوش 18 فولت",
-        "price": "499.00 SAR",
-        "old_price": "799.00 SAR",
-        "has_discount": True,
-        "affiliate_link_saudi": "https://www.amazon.sa/dp/B0TEST?tag=tikshoping01-21",
-        "affiliate_link_us": "https://www.amazon.sa/dp/B0TEST?tag=electron039ae-20",
-    }
-
-    print("=== 5 captions (should all be different) ===\n")
-    for i in range(5):
-        print(f"--- Caption {i + 1} ---")
-        print(build(sample, platform="telegram"))
-        print()
+    return f"{name}\n\n{fixed}"
