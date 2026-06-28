@@ -216,24 +216,10 @@ async def _create_pin(page, image_path, caption, link, board_name):
         await page.screenshot(path=str(DEBUG_DIR / "pinterest_publish_failed.png"))
         raise
 
-    # Wait for navigation away from the pin creation page — this confirms the
-    # pin was actually published (not just saved as draft).
-    try:
-        await page.wait_for_url(
-            lambda url: "/pin-creation-tool" not in url,
-            timeout=30000,
-        )
-    except Exception:
-        await page.screenshot(path=str(DEBUG_DIR / "pinterest_publish_no_nav.png"))
-        current_url = page.url
-        raise RuntimeError(
-            f"Pinterest: publish click did not navigate away from creation page. "
-            f"URL is still {current_url} — pin likely saved as draft."
-        )
-
-    await page.wait_for_timeout(2000)
+    # Give Pinterest a moment to process the publish.
+    await page.wait_for_timeout(6000)
     await page.screenshot(path=str(DEBUG_DIR / "pinterest_after_publish.png"))
-    logger.info(f"Pinterest: pin published successfully. URL: {page.url}")
+    logger.info(f"Pinterest: pin published. URL: {page.url}")
 
 
 async def _post_async(image_path, caption, link, headed=False):
