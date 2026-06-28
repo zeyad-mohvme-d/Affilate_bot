@@ -23,6 +23,7 @@ import requests
 from scraper.amazon_scraper import get_products
 from content.caption import build as build_caption
 from content.video_builder import build as build_video
+from content.screenshot_builder import build as build_screenshot
 from posters.telegram_poster import post as post_telegram
 from posters.pinterest_poster import post as post_pinterest
 from posters.x_poster import post as post_x
@@ -130,13 +131,21 @@ def run_post():
     product = queue[0]
     logger.info(f"Posting: {product['name'][:70]}")
 
-    # Download the raw Amazon product photo (no overlay / branding).
+    # Capture a screenshot of the Amazon product page; if that fails,
+    # fall back to downloading the high-res product image.
     try:
-        image_path = download_product_image(product)
-        logger.info(f"Image: {image_path}")
+        image_path = build_screenshot(product)
+        logger.info(f"Image (screenshot): {image_path}")
     except Exception:
-        logger.error(f"Image download failed:\n{traceback.format_exc()}")
-        sys.exit(1)
+        logger.warning(
+            f"Screenshot capture failed, falling back to raw image:\n{traceback.format_exc()}"
+        )
+        try:
+            image_path = download_product_image(product)
+            logger.info(f"Image (fallback): {image_path}")
+        except Exception:
+            logger.error(f"Image fallback also failed:\n{traceback.format_exc()}")
+            sys.exit(1)
 
     try:
         video_path = build_video(product)
