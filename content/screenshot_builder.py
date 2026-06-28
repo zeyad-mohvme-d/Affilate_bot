@@ -4,14 +4,18 @@ as the post image. Replaces the raw thumbnail with a richer visual that
 includes product photo + name + price + rating + Prime badge — the
 "natural Amazon product card" look.
 
-Uses Playwright (already a project dependency).
+Uses invisible_playwright (anti-detection wrapper) to reduce the chance
+of Amazon serving us the "continue shopping" verification interstitial.
+Raises RuntimeError if Amazon serves a verification/captcha page, so the
+caller can fall back to the raw product image.
 """
 
 import asyncio
 import logging
 from pathlib import Path
 
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+from invisible_playwright.async_api import InvisiblePlaywright
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -26,26 +30,65 @@ PRODUCT_BLOCK_SELECTORS = [
     "#centerCol",
 ]
 
+# Markers that signal Amazon served the verification "continue shopping"
+# interstitial or a captcha page instead of the real product page.
+VERIFICATION_MARKERS_AR = [
+    "تابع التسوق",
+    "متابعة التسوق",
+    "انقر فوق الزر أدناه",
+]
+VERIFICATION_MARKERS_EN = [
+    "continue shopping",
+    "click the button below",
+    "type the characters",
+    "robot check",
+    "enter the characters you see",
+]
+VERIFICATION_URL_MARKERS = [
+    "/errors/validateCaptcha",
+    "/ap/cvf/",
+    "/ax/claim/",
+]
+
+
+async def _is_verification_page(page) -> bool:
+    """Return True if the current page is Amazon's bot-check interstitial."""
+    url = (page.url or "").lower()
+    if any(marker in url for marker in VERIFICATION_URL_MARKERS):
+        return True
+
+    # Real product pages always have #productTitle. If it's missing, look for
+    # textual markers of the verification page.
+    if await page.locator("#productTitle").count() > 0:
+        return False
+
+    try:
+        body_text = (await page.locator("body").inner_text(timeout=3000)).lower()
+    except Exception:
+        return False
+
+    if any(marker.lower() in body_text for marker in VERIFICATION_MARKERS_AR):
+        return True
+    if any(marker in body_text for marker in VERIFICATION_MARKERS_EN):
+        return True
+    return False
+
 
 async def _capture_async(product_url: str, dest: Path) -> str:
     """Take the screenshot and return the full product title from the
-    detail page (empty string if not found)."""
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(
-            locale="ar-SA",
-            timezone_id="Asia/Riyadh",
-            viewport={"width": 1280, "height": 1600},
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/125.0 Safari/537.36"
-            ),
-            extra_http_headers={"Accept-Language": "ar-SA,ar;q=0.9,en;q=0.6"},
-        )
-        page = await context.new_page()
+    detail page (empty string if not found). Raises RuntimeError if Amazon
+    serves a verification page."""
+    async with InvisiblePlaywright(headless=True) as browser:
+        page = await browser.new_page()
         try:
             await page.goto(product_url, wait_until="domcontentloaded", timeout=45000)
+            await page.wait_for_timeout(2500)
+
+            # Reject the verification interstitial immediately — let the
+            # caller fall back to raw image rather than post junk.
+            if await _is_verification_page(page):
+                logger.warning(f"Amazon verification page detected at {page.url}")
+                raise RuntimeError("Amazon served verification page instead of product")
 
             # Wait for any of the product blocks to render.
             try:
@@ -54,15 +97,15 @@ async def _capture_async(product_url: str, dest: Path) -> str:
                     timeout=15000,
                 )
             except PlaywrightTimeoutError:
+                # Double-check: maybe Amazon swapped in verification after
+                # initial load. If so, raise so the caller can fall back.
+                if await _is_verification_page(page):
+                    raise RuntimeError("Amazon served verification page (late)")
                 logger.warning("Product block selectors not found — capturing viewport.")
                 await page.screenshot(path=str(dest), full_page=False)
                 return ""
 
-            # Let lazy-loaded images settle.
-            await page.wait_for_timeout(2500)
-
-            # Grab the canonical full product title from the detail page.
-            # This is the same string shown in Amazon's <title> tag and meta og:title.
+            # Grab the canonical full product title.
             full_title = ""
             title_locator = page.locator("#productTitle").first
             if await title_locator.count() > 0:
@@ -88,8 +131,7 @@ async def _capture_async(product_url: str, dest: Path) -> str:
             logger.info(f"Screenshot saved: {dest}")
             return full_title
         finally:
-            await context.close()
-            await browser.close()
+            pass
 
 
 def build(product) -> Path:
