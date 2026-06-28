@@ -27,7 +27,9 @@ PRODUCT_BLOCK_SELECTORS = [
 ]
 
 
-async def _capture_async(product_url: str, dest: Path) -> None:
+async def _capture_async(product_url: str, dest: Path) -> str:
+    """Take the screenshot and return the full product title from the
+    detail page (empty string if not found)."""
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
         context = await browser.new_context(
@@ -54,10 +56,20 @@ async def _capture_async(product_url: str, dest: Path) -> None:
             except PlaywrightTimeoutError:
                 logger.warning("Product block selectors not found — capturing viewport.")
                 await page.screenshot(path=str(dest), full_page=False)
-                return
+                return ""
 
             # Let lazy-loaded images settle.
             await page.wait_for_timeout(2500)
+
+            # Grab the canonical full product title from the detail page.
+            # This is the same string shown in Amazon's <title> tag and meta og:title.
+            full_title = ""
+            title_locator = page.locator("#productTitle").first
+            if await title_locator.count() > 0:
+                try:
+                    full_title = (await title_locator.inner_text(timeout=3000)).strip()
+                except Exception:
+                    full_title = ""
 
             # Find the first selector that actually has a visible element.
             block = None
@@ -70,17 +82,23 @@ async def _capture_async(product_url: str, dest: Path) -> None:
             if block is None:
                 logger.warning("No product block matched — capturing viewport.")
                 await page.screenshot(path=str(dest), full_page=False)
-                return
+                return full_title
 
             await block.screenshot(path=str(dest))
             logger.info(f"Screenshot saved: {dest}")
+            return full_title
         finally:
             await context.close()
             await browser.close()
 
 
 def build(product) -> Path:
-    """Screenshot the Amazon product page. Returns the saved file path."""
+    """Screenshot the Amazon product page. Returns the saved file path.
+
+    Side effect: if the detail page exposes a fuller product title than what
+    the search-result scraper captured, the product dict's `name` field is
+    updated in place so downstream captions use the better title.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     dest = OUTPUT_DIR / f"{product['asin']}.png"
 
@@ -92,5 +110,10 @@ def build(product) -> Path:
     if not product_url:
         raise RuntimeError(f"Product {product['asin']} has no URL to screenshot")
 
-    asyncio.run(_capture_async(product_url, dest))
+    full_title = asyncio.run(_capture_async(product_url, dest))
+
+    if full_title and len(full_title) > len(product.get("name", "")):
+        logger.info(f"Updated product name from detail page: {full_title[:60]}…")
+        product["name"] = full_title
+
     return dest
