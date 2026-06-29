@@ -1,28 +1,37 @@
 """
-X (Twitter) Poster — posts tweets via invisible_playwright (anti-detection).
+X (Twitter) Poster — posts tweets via Playwright using saved cookies.
 Two modes:
   --login   : opens a browser, you log in manually, cookies are saved.
   (default) : uses saved cookies to post a tweet automatically.
-All credentials come from config.json.
+
+Switched from invisible_playwright to plain playwright because
+invisible_playwright is incompatible with the current Chromium DevTools
+protocol on GitHub-Actions runners (Browser.setDefaultViewport rejects
+its `isMobile: false` parameter).
 """
 
 import asyncio
 import json
 import logging
+import sys
 from pathlib import Path
 
-from invisible_playwright.async_api import InvisiblePlaywright
+from playwright.async_api import async_playwright
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from core.config import load_config
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.json"
 COOKIES_PATH = Path(__file__).resolve().parent.parent / "x_cookies.json"
 DEBUG_DIR = Path(__file__).resolve().parent.parent / "output" / "debug"
 
-
-def load_config():
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/125.0 Safari/537.36"
+)
+VIEWPORT = {"width": 1280, "height": 900}
 
 
 def _save_cookies(cookies):
@@ -37,36 +46,53 @@ def _load_cookies():
     return None
 
 
+async def _new_context(playwright_obj, headless: bool):
+    """Build a browser context with a realistic user agent + viewport."""
+    browser = await playwright_obj.chromium.launch(headless=headless)
+    context = await browser.new_context(
+        viewport=VIEWPORT,
+        user_agent=USER_AGENT,
+        locale="en-US",
+        extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
+    )
+    return browser, context
+
+
 # ── Manual login mode ────────────────────────────────────────────────────
 
-async def _manual_login():
-    """Open an anti-detection browser for the user to log in manually."""
-    async with InvisiblePlaywright(headless=False) as browser:
-        page = await browser.new_page()
-        await page.goto("https://x.com/login", timeout=120000)
+async def _manual_login_async():
+    """Open a visible browser for the user to log in manually."""
+    async with async_playwright() as pw:
+        browser, context = await _new_context(pw, headless=False)
+        page = await context.new_page()
+        try:
+            await page.goto("https://x.com/login", timeout=120000)
 
-        print("\n" + "=" * 60)
-        print("  MANUAL LOGIN")
-        print("  Log in to X in the browser window that just opened.")
-        print("  When you see your home feed, come back here and")
-        print("  press ENTER to save cookies.")
-        print("=" * 60)
+            print("\n" + "=" * 60)
+            print("  MANUAL LOGIN")
+            print("  Log in to X in the browser window that just opened.")
+            print("  When you see your home feed, come back here and")
+            print("  press ENTER to save cookies.")
+            print("=" * 60)
 
-        input("\n>>> Press ENTER after you've logged in... ")
+            input("\n>>> Press ENTER after you've logged in... ")
 
-        current_url = page.url.lower()
-        if "login" in current_url:
-            print("WARNING: URL still shows login page. Saving cookies anyway.")
+            current_url = page.url.lower()
+            if "login" in current_url:
+                print("WARNING: URL still shows login page. Saving cookies anyway.")
 
-        cookies = await page.context.cookies()
-        _save_cookies(cookies)
-        print(f"\nCookies saved to {COOKIES_PATH}")
-        print(f"Saved {len(cookies)} cookies.")
+            cookies = await context.cookies()
+            _save_cookies(cookies)
+            print(f"\nCookies saved to {COOKIES_PATH}")
+            print(f"Saved {len(cookies)} cookies.")
+        finally:
+            await context.close()
+            await browser.close()
 
 
 def manual_login():
     """Public function to run manual login."""
-    asyncio.run(_manual_login())
+    asyncio.run(_manual_login_async())
 
 
 # ── Automated posting ────────────────────────────────────────────────────
@@ -117,20 +143,21 @@ async def _post_async(caption, headed=False):
             "No saved cookies found. Run 'python -m posters.x_poster --login' first."
         )
 
-    async with InvisiblePlaywright(headless=not headed) as browser:
-        page = await browser.new_page()
-
-        await page.context.add_cookies(saved_cookies)
-        logger.info("X: loaded saved cookies.")
-
+    async with async_playwright() as pw:
+        browser, context = await _new_context(pw, headless=not headed)
         try:
+            await context.add_cookies(saved_cookies)
+            logger.info("X: loaded saved cookies.")
+
+            page = await context.new_page()
             await _compose_and_post(page, caption)
 
-            cookies = await page.context.cookies()
+            # Refresh saved cookies in case X rotated any.
+            cookies = await context.cookies()
             _save_cookies(cookies)
-
         finally:
-            pass
+            await context.close()
+            await browser.close()
 
 
 def post(caption, headed=False):
@@ -145,8 +172,6 @@ def post(caption, headed=False):
 # ── Standalone test ───────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    import sys
-
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
         if reconfigure:
@@ -155,7 +180,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
     if "--login" in sys.argv:
-        print("Opening anti-detection browser for manual X login...")
+        print("Opening browser for manual X login...")
         manual_login()
         print("\nDone! Now you can post with: python -m posters.x_poster")
         sys.exit(0)
