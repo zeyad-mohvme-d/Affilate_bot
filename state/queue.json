@@ -1,21 +1,5 @@
 [
   {
-    "asin": "B0727Y5L53",
-    "name": "Amazon Basics",
-    "price": "SAR 479.00",
-    "old_price": "SAR 509.00",
-    "has_discount": true,
-    "link": "https://www.amazon.sa/-/en/Amazon-Basics-Hardside-Spinner-Material/dp/B0727Y5L53/ref=sr_1_19?dib=eyJ2IjoiMSJ9.eLj9I-8xXUIxh49ioa4bbMm2gu0Gw_ph4b0-GFh90FXPc3o2dUBmALR5Taj7FF9K4uBLvr5ruJbgNUIS_wVwwvDP17QKVdCt543H3LDiW707uLj49H5QlrGuMotfNG4UX8xUUDW4c0klPTFO3L72iLPsyTLAFtpIogVswNvLbWKJdWeguLm50kPE7b0AGVANhZPD_KPMQakeYXc8K8xOSKwHb6G1-fZXP-Bnr9dBEVXxLe2L5gh9aPPIiZD1cnyvIdcK0UV1viPnNpNI9Z3ODL_KzJjfdryMKh7P14raXks.aQWU746yMFQiHtUgpakSX7fDm0uUFiXhaCl0WCSKQfo&dib_tag=se&keywords=luggage&qid=1782679754&sr=8-19",
-    "image_url": "https://m.media-amazon.com/images/I/71XiGGmK8ZL._AC_UL320_.jpg",
-    "group_id": "group_1",
-    "group_name": "الملابس والأمتعة والأحذية",
-    "category": "الأمتعة",
-    "query": "luggage",
-    "source_url": "https://www.amazon.sa/s?k=luggage&language=en_AE",
-    "affiliate_link_saudi": "https://www.amazon.sa/dp/B0727Y5L53?tag=electron039ae-20",
-    "affiliate_link_us": "https://www.amazon.sa/dp/B0727Y5L53?tag=electron039ae-20"
-  },
-  {
     "asin": "B07Y6CQ23N",
     "name": "American Tourister",
     "price": "SAR 348.00",
