@@ -108,9 +108,11 @@ def _build_product_frame(product_img):
 
     if product_img:
         img = product_img.copy()
-        img.thumbnail((900, 900), Image.LANCZOS)
+        # Cap to ~1000 px wide (with ~40 px side margins) and leave a little
+        # vertical breathing room. thumbnail() preserves aspect ratio.
+        img.thumbnail((1000, VIDEO_HEIGHT - 100), Image.LANCZOS)
         x = (VIDEO_WIDTH - img.width) // 2
-        y = 200
+        y = (VIDEO_HEIGHT - img.height) // 2
         frame.paste(img, (x, y))
 
     return frame
