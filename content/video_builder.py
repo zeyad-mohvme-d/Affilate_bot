@@ -108,9 +108,18 @@ def _build_product_frame(product_img):
 
     if product_img:
         img = product_img.copy()
-        # Cap to ~1000 px wide (with ~40 px side margins) and leave a little
-        # vertical breathing room. thumbnail() preserves aspect ratio.
-        img.thumbnail((1000, VIDEO_HEIGHT - 100), Image.LANCZOS)
+        # Force-scale (up or down) to ~1000 px wide while keeping aspect ratio,
+        # then cap height so it never overflows the frame. thumbnail() only
+        # shrinks, which leaves small source images tiny — we need resize().
+        target_w = 1000
+        max_h = VIDEO_HEIGHT - 100
+        aspect = img.height / img.width
+        new_w = target_w
+        new_h = int(target_w * aspect)
+        if new_h > max_h:
+            new_h = max_h
+            new_w = int(max_h / aspect)
+        img = img.resize((new_w, new_h), Image.LANCZOS)
         x = (VIDEO_WIDTH - img.width) // 2
         y = (VIDEO_HEIGHT - img.height) // 2
         frame.paste(img, (x, y))
@@ -180,7 +189,8 @@ def _build_info_frame(product):
         [(btn_x, y_cta), (btn_x + btn_w, y_cta + btn_h)],
         radius=20, fill=ACCENT_COLOR,
     )
-    cta_text = _shape_arabic("اطلب الآن")
+    # English CTA — avoids the Arabic RTL rendering issue in this frame.
+    cta_text = "Order Now"
     draw.text((VIDEO_WIDTH // 2, y_cta + btn_h // 2), cta_text,
               fill=(255, 255, 255), font=cta_font, anchor="mm")
 
