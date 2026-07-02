@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     test_caption = (
         "Test post from Amazon Affiliate Bot\n\n"
-        "https://www.amazon.sa/dp/B0FW57V6M4?tag=tikshoping01-21"
+        "https://www.amazon.com/dp/B0FW57V6M4?tag=electron039ae-20"
     )
 
     headed = "--headed" in sys.argv

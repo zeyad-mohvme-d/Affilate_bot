@@ -1,6 +1,6 @@
 """
-Amazon Scraper — scrapes products from Amazon.sa search pages using Playwright.
-Reads settings from config.json. Adds affiliate tags. Detects discounts.
+Amazon Scraper — scrapes products from Amazon.com search pages using Playwright.
+Reads settings from config.json. Adds the US affiliate tag. Detects discounts.
 """
 
 import asyncio
@@ -22,7 +22,7 @@ from core.config import load_config
 
 logger = logging.getLogger(__name__)
 
-BASE_URL = "https://www.amazon.sa"
+BASE_URL = "https://www.amazon.com"
 CATEGORIES_PATH = PROJECT_DIR / "scraper" / "categories.json"
 OUTPUT_DIR = PROJECT_DIR / "output"
 
@@ -47,11 +47,11 @@ def safe_filename(value: str, fallback: str) -> str:
 
 
 def amazon_search_url(query: str) -> str:
-    return f"{BASE_URL}/s?k={quote_plus(query)}&language=en_AE"
+    return f"{BASE_URL}/s?k={quote_plus(query)}"
 
 
 def build_affiliate_link(product_url: str, tag: str) -> str:
-    """Build a clean short affiliate link: amazon.sa/dp/ASIN?tag=..."""
+    """Build a clean short affiliate link: amazon.com/dp/ASIN?tag=..."""
     parsed = urlparse(product_url)
 
     asin_match = re.search(r"/dp/([A-Z0-9]{10})", parsed.path)
@@ -358,17 +358,16 @@ def get_products(
     headed: bool = False,
 ) -> list[dict]:
     """
-    Scrape products from Amazon.sa. Reads config.json for source_url and tags.
-    Adds affiliate links to each product.
+    Scrape products from Amazon.com. Reads config.json for source_url and tag.
+    Adds the US affiliate link to each product.
 
     Returns a list of product dicts with keys:
         asin, name, price, old_price, has_discount,
-        link, affiliate_link_saudi, affiliate_link_us,
+        link, affiliate_link_us,
         image_url, group_id, group_name, category, query, source_url
     """
     config = load_config()
     amazon_config = config["amazon"]
-    tag_saudi = amazon_config["tag_saudi"]
     tag_us = amazon_config["tag_us"]
 
     if use_categories and CATEGORIES_PATH.exists():
@@ -391,7 +390,6 @@ def get_products(
     )
 
     for product in all_products:
-        product["affiliate_link_saudi"] = build_affiliate_link(product["link"], tag_saudi)
         product["affiliate_link_us"] = build_affiliate_link(product["link"], tag_us)
 
     if config.get("prioritize_discounts"):
@@ -412,7 +410,7 @@ async def _scrape_all(
         browser = await playwright.chromium.launch(headless=not headed)
         context = await browser.new_context(
             locale="en-US",
-            timezone_id="Asia/Riyadh",
+            timezone_id="America/New_York",
             viewport={"width": 1365, "height": 900},
             user_agent=(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -420,7 +418,7 @@ async def _scrape_all(
                 "Chrome/125.0 Safari/537.36"
             ),
             extra_http_headers={
-                "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
             },
         )
         page = await context.new_page()
@@ -461,6 +459,5 @@ if __name__ == "__main__":
         print(f"    Price: {p['price']}")
         if p["has_discount"]:
             print(f"    Old price: {p['old_price']} (DISCOUNT)")
-        print(f"    Saudi link: {p['affiliate_link_saudi'][:80]}...")
-        print(f"    US link:    {p['affiliate_link_us'][:80]}...")
+        print(f"    Link: {p['affiliate_link_us'][:80]}...")
         print()

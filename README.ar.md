@@ -290,8 +290,7 @@ python -m playwright install chromium
 | `products_per_day` | كام منتج بيتم جلبهم يومياً (افتراضي 10) |
 | `prioritize_discounts` | لو `true`، المنتجات اللي عليها خصم بتتنشر الأول |
 | `amazon.source_url` | رابط بحث احتياطي لو ما فيش categories |
-| `amazon.tag_saudi` | تاج الأفلييت لتيليجرام و X (الجمهور السعودي) |
-| `amazon.tag_us` | تاج الأفلييت لـ Pinterest (الجمهور الأمريكي) |
+| `amazon.tag_us` | تاج الأفلييت الأمريكي المطبق على كل الروابط في كل المنصات |
 | `pinterest.default_board` | اسم البورد اللي البوت بينشر فيه على Pinterest |
 | `captions.hashtags` | الهاشتاجات اللي بتتضاف لكل كابشن |
 

@@ -311,7 +311,7 @@ if __name__ == "__main__":
         img.save(test_image)
 
     test_caption = "Amazing Deal - Test Pin from Amazon Affiliate Bot"
-    test_link = "https://www.amazon.sa/dp/B0FW57V6M4?tag=electron039ae-20"
+    test_link = "https://www.amazon.com/dp/B0FW57V6M4?tag=electron039ae-20"
 
     headed = "--headed" in sys.argv
 

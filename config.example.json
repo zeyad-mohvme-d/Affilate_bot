@@ -4,8 +4,7 @@
   "prioritize_discounts": true,
 
   "amazon": {
-    "source_url": "https://www.amazon.sa/s?k=home+improvement&i=bazaar&_encoding=UTF8&ref=sv__8",
-    "tag_saudi": "electron039ae-20",
+    "source_url": "https://www.amazon.com/s?k=home+improvement",
     "tag_us": "electron039ae-20"
   },
 

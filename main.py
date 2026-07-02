@@ -98,7 +98,7 @@ def run_scrape():
     config = load_config()
     products_per_day = config.get("products_per_day", 10)
 
-    logger.info(f"Scraping {products_per_day} products from Amazon.sa...")
+    logger.info(f"Scraping {products_per_day} products from Amazon.com...")
     products = get_products(
         limit=products_per_day * 2,
         use_categories=True,

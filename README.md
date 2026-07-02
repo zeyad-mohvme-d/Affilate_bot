@@ -290,8 +290,7 @@ Most things you might want to change live in **`config.example.json`** (which be
 | `products_per_day` | How many products the daily scrape collects (default 10) |
 | `prioritize_discounts` | If `true`, discounted products are posted first |
 | `amazon.source_url` | Fallback search URL if no categories are loaded |
-| `amazon.tag_saudi` | Affiliate tag for Telegram + X (Saudi audience) |
-| `amazon.tag_us` | Affiliate tag for Pinterest (US audience) |
+| `amazon.tag_us` | US Amazon Associates tag applied to every link (all platforms) |
 | `pinterest.default_board` | Which Pinterest board to post to |
 | `captions.hashtags` | Hashtags appended to every caption |
 

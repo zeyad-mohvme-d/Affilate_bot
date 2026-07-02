@@ -34,20 +34,16 @@ def build(product, platform="telegram"):
     Build a marketing caption for a product.
 
     product dict keys used:
-        name, price, affiliate_link_saudi, affiliate_link_us
+        name, price, affiliate_link_us
 
     platform: "telegram", "x", or "pinterest"
-        - telegram/x use Saudi affiliate link
-        - pinterest uses US affiliate link
+        - all platforms use the same US affiliate link
     """
     captions = _load_config().get("captions", {})
     bank_line = (captions.get("bank_discount_line") or "").strip()
     channel_line = (captions.get("channel_code_line") or "").strip()
 
-    if platform == "pinterest":
-        link = product.get("affiliate_link_us") or product.get("link", "")
-    else:
-        link = product.get("affiliate_link_saudi") or product.get("link", "")
+    link = product.get("affiliate_link_us") or product.get("link", "")
 
     name = (product.get("name") or "").strip()
     price = (product.get("price") or "").strip()

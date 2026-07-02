@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "images"
 
-# Selectors for the main product detail block on amazon.sa pages.
+# Selectors for the main product detail block (same across regional Amazon stores).
 # Tried in order — first one that exists is screenshotted.
 PRODUCT_BLOCK_SELECTORS = [
     "#dp-container",
@@ -146,7 +146,6 @@ def build(product) -> Path:
 
     product_url = (
         product.get("link")
-        or product.get("affiliate_link_saudi")
         or product.get("affiliate_link_us")
     )
     if not product_url:
