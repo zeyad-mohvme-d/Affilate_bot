@@ -390,6 +390,12 @@ def get_products(
     )
 
     for product in all_products:
+        # Search cards for sponsored products expose /sspa/click?... wrapper URLs
+        # that 404 without the full tracking payload. Rewrite the link to the
+        # canonical /dp/ASIN URL using the ASIN we already extracted.
+        asin = product.get("asin")
+        if asin:
+            product["link"] = f"{BASE_URL}/dp/{asin}"
         product["affiliate_link_us"] = build_affiliate_link(product["link"], tag_us)
 
     if config.get("prioritize_discounts"):
