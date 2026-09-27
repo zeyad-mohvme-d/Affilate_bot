@@ -38,6 +38,29 @@ jobs:
       - name: Prepare config.json from example
         run: cp config.example.json config.json
 
+      - name: Inject Amazon affiliate tag
+        env:
+          AMAZON_ASSOCIATE_TAG: ${{ secrets.AMAZON_ASSOCIATE_TAG }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("config.json")
+          config = json.loads(path.read_text(encoding="utf-8"))
+          tag = os.environ.get("AMAZON_ASSOCIATE_TAG", "").strip()
+
+          if not tag:
+              raise RuntimeError("Missing required GitHub secret: AMAZON_ASSOCIATE_TAG")
+
+          config.setdefault("amazon", {})["tag_us"] = tag
+          path.write_text(
+              json.dumps(config, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
       - name: Run scraper
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
