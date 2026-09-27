@@ -5,7 +5,7 @@
 
   "amazon": {
     "source_url": "https://www.amazon.com/s?k=home+improvement",
-    "tag_us": "electron039ae-20"
+    "tag_us": "YOUR_AMAZON_ASSOCIATE_TAG"
   },
 
   "telegram": {
@@ -16,12 +16,12 @@
   "pinterest": {
     "email": "set via PINTEREST_EMAIL env var",
     "password": "set via PINTEREST_PASSWORD env var",
-    "default_board": "for amazon"
+    "default_board": "YOUR_BOARD_NAME"
   },
 
   "captions": {
     "language": "ar",
-    "bank_discount_line": "فعّل خصم بنك الراجحي 25% ⬅️",
-    "channel_code_line": "فعّل كود القناة 15% ⬅️"
+    "bank_discount_line": "",
+    "channel_code_line": ""
   }
 }
