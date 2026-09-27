@@ -175,6 +175,18 @@ The current workflow contains 10 scheduled runs between 09:00 and 22:00 Riyadh t
 
 Runtime credentials are supplied through environment variables / GitHub Actions secrets rather than committed credentials.
 
+Required GitHub Actions secrets for the production workflow include:
+
+- `AMAZON_ASSOCIATE_TAG`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHANNEL_ID`
+- `PINTEREST_EMAIL`
+- `PINTEREST_PASSWORD`
+- `X_COOKIES_JSON`
+- `PINTEREST_COOKIES_JSON`
+
+The example configuration intentionally contains placeholders. The Amazon affiliate tag is injected into the runtime configuration during the scrape workflow and is never stored in the public example config.
+
 Do not commit:
 
 - `config.json`
@@ -182,8 +194,6 @@ Do not commit:
 - `pinterest_cookies.json`
 - Real affiliate identifiers
 - Real runtime queue/history data when they contain operational tracking data
-
-For portfolio use, replace real affiliate IDs with placeholders in example configuration.
 
 ## Local Setup
 
@@ -201,7 +211,7 @@ pip install -r requirements.txt
 python -m playwright install chromium
 ```
 
-Create `config.json` from `config.example.json` and provide the required runtime values through environment variables or local configuration.
+Create `config.json` from `config.example.json` and provide the required runtime values through environment variables or local configuration. Set `AMAZON_ASSOCIATE_TAG` for affiliate-link generation.
 
 ### Run the scraper
 
